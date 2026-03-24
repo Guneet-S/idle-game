@@ -1,104 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Leek Factory Tycoon</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Cosmic Plasma — An infinite idle game where you harness plasma energy across the cosmos. Prestige to earn Cosmic Shards and grow ever more powerful.">
+    <title>Cosmic Plasma — Idle Prestige Game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  
-  <div id="game-app">
-    <!-- Top Nav -->
-    <header class="top-nav">
-      <div class="nav-stat">
-        <span class="stat-title">Revenue</span>
-        <span class="stat-val"><span id="rev-val">0</span>🪙 /m</span>
-      </div>
-      <div class="nav-stat">
-         <span class="stat-title">World Rank</span>
-         <span class="stat-val">#<span id="rank-val">9999</span></span>
-      </div>
-      <div class="nav-stat primary-stat">
-         <span class="stat-title">Gold</span>
-         <span class="stat-val">🪙 <span id="cash-val">50</span></span>
-      </div>
-    </header>
+    <!-- Particle canvas background -->
+    <canvas id="particles-canvas"></canvas>
 
-    <div class="main-split">
-      <!-- Left Map Area -->
-      <div class="map-area" id="map-area">
-        
-        <!-- Dirt/Grass Background Detail -->
-        <div class="map-bg"></div>
+    <!-- Main wrapper -->
+    <div id="app">
+        <!-- Header -->
+        <header id="game-header">
+            <h1 class="game-title">COSMIC <span class="accent">PLASMA</span></h1>
+            <div class="header-stats">
+                <div class="stat-badge" id="shard-badge" title="Cosmic Shards">
+                    <span class="stat-icon">💎</span>
+                    <span id="shard-count">0</span>
+                </div>
+                <div class="stat-badge" id="prestige-badge" title="Prestige Level">
+                    <span class="stat-icon">⭐</span>
+                    <span id="prestige-level">0</span>
+                </div>
+                <div class="stat-badge" id="multiplier-badge" title="Production Multiplier">
+                    <span class="stat-icon">⚡</span>
+                    <span id="multiplier-display">x1.00</span>
+                </div>
+            </div>
+        </header>
 
-        <!-- SVG Conveyor Belt -->
-        <svg viewBox="0 0 100 100" id="belt-svg" preserveAspectRatio="none">
-          <!-- Background dark pad -->
-          <path id="track" d="M -5 20 L 25 20 L 25 70 L 65 70 L 65 30 L 105 30" fill="none" stroke="#2f3542" stroke-width="8" />
-          <!-- Animated yellow dashed lines -->
-          <path d="M -5 20 L 25 20 L 25 70 L 65 70 L 65 30 L 105 30" fill="none" stroke="#fbc531" stroke-width="7" stroke-dasharray="2 2" class="belt-lines" />
-          <!-- Inner dark belt -->
-          <path d="M -5 20 L 25 20 L 25 70 L 65 70 L 65 30 L 105 30" fill="none" stroke="#222" stroke-width="6" />
-        </svg>
+        <!-- Plasma display -->
+        <section id="plasma-section">
+            <div id="plasma-display">
+                <div class="plasma-amount" id="plasma-amount">0</div>
+                <div class="plasma-label">Plasma Energy</div>
+                <div class="plasma-rate" id="plasma-rate">0 / sec</div>
+            </div>
+            <button id="plasma-click-btn" onclick="handleClick()">
+                <div class="click-inner">
+                    <div class="click-ring ring-1"></div>
+                    <div class="click-ring ring-2"></div>
+                    <div class="click-ring ring-3"></div>
+                    <span class="click-icon">⚛</span>
+                </div>
+            </button>
+            <div class="click-power-label">Click Power: <span id="click-power-display">1</span></div>
+        </section>
 
-        <!-- Plots Layer (Absolute DOM nodes pinned to SVG path) -->
-        <div id="plots-layer"></div>
-        
-        <!-- Items Layer -->
-        <div id="items-layer"></div>
+        <!-- Tab navigation -->
+        <nav id="tab-nav">
+            <button class="tab-btn active" data-tab="generators" onclick="switchTab('generators')">Generators</button>
+            <button class="tab-btn" data-tab="upgrades" onclick="switchTab('upgrades')">Upgrades</button>
+            <button class="tab-btn" data-tab="prestige" onclick="switchTab('prestige')">Prestige</button>
+            <button class="tab-btn" data-tab="stats" onclick="switchTab('stats')">Stats</button>
+        </nav>
 
-        <!-- Start Spawner -->
-        <div class="spawner-node">
-           <div class="spawner-icon">🌿</div>
-           <div class="spawner-lbl">Spawner</div>
-           <div class="progress-bar"><div class="progress-fill" id="spawner-fill"></div></div>
-           <button class="upg-btn" id="spawner-upg-btn">Upg $<span id="s-upg-cost">10</span></button>
+        <!-- Tab panels -->
+        <div id="tab-content">
+            <!-- Generators Tab -->
+            <div class="tab-panel active" id="tab-generators">
+                <div id="generators-list"></div>
+            </div>
+
+            <!-- Upgrades Tab -->
+            <div class="tab-panel" id="tab-upgrades">
+                <div id="upgrades-list"></div>
+            </div>
+
+            <!-- Prestige Tab -->
+            <div class="tab-panel" id="tab-prestige">
+                <div class="prestige-info glass-panel">
+                    <h2>🌌 Cosmic Prestige</h2>
+                    <p>Reset your generators and plasma to earn <strong>Cosmic Shards</strong>. Each shard permanently boosts ALL production by <strong>5%</strong>.</p>
+                    <div class="prestige-preview">
+                        <div class="prestige-stat">
+                            <span class="prestige-stat-label">Shards on Prestige</span>
+                            <span class="prestige-stat-value" id="prestige-shards-preview">0</span>
+                        </div>
+                        <div class="prestige-stat">
+                            <span class="prestige-stat-label">Total Shards After</span>
+                            <span class="prestige-stat-value" id="prestige-shards-total">0</span>
+                        </div>
+                        <div class="prestige-stat">
+                            <span class="prestige-stat-label">New Multiplier</span>
+                            <span class="prestige-stat-value" id="prestige-new-mult">x1.00</span>
+                        </div>
+                    </div>
+                    <button id="prestige-btn" class="prestige-button" onclick="doPrestige()" disabled>
+                        <span class="prestige-btn-text">PRESTIGE</span>
+                        <span class="prestige-btn-sub">Requires 1M+ total plasma</span>
+                    </button>
+                </div>
+
+                <!-- Shard Upgrades -->
+                <h3 class="section-heading">💎 Shard Upgrades</h3>
+                <div id="shard-upgrades-list"></div>
+            </div>
+
+            <!-- Stats Tab -->
+            <div class="tab-panel" id="tab-stats">
+                <div class="stats-grid glass-panel">
+                    <div class="stat-row"><span>Total Plasma Earned</span><span id="stat-total-plasma">0</span></div>
+                    <div class="stat-row"><span>Total Clicks</span><span id="stat-total-clicks">0</span></div>
+                    <div class="stat-row"><span>Plasma from Clicks</span><span id="stat-click-plasma">0</span></div>
+                    <div class="stat-row"><span>Plasma from Generators</span><span id="stat-gen-plasma">0</span></div>
+                    <div class="stat-row"><span>Times Prestiged</span><span id="stat-prestiges">0</span></div>
+                    <div class="stat-row"><span>Total Shards Earned</span><span id="stat-total-shards">0</span></div>
+                    <div class="stat-row"><span>Current Multiplier</span><span id="stat-multiplier">x1.00</span></div>
+                    <div class="stat-row"><span>Play Time</span><span id="stat-playtime">0s</span></div>
+                </div>
+                <div class="save-controls">
+                    <button class="save-btn" onclick="saveGame()">💾 Save Game</button>
+                    <button class="save-btn danger" onclick="hardReset()">🗑️ Hard Reset</button>
+                </div>
+            </div>
         </div>
-      </div>
 
-      <!-- Right PRICING BOARD / RESTAURANT Area -->
-      <div class="side-sidebar">
-        <div class="restaurant-roof"></div>
-        <div class="price-board-container">
-           <div class="board-wood">
-             <h3 class="board-title">Sell Prices</h3>
-             <ul class="price-list" id="price-list">
-               <!-- JS populated -->
-             </ul>
-           </div>
-        </div>
-        <div class="prestige-box">
-           <button id="prestige-btn" class="prestige-btn hidden">Prestige ♻️</button>
-        </div>
-      </div>
+        <!-- Toast notifications -->
+        <div id="toast-container"></div>
     </div>
-  </div>
 
-  <!-- Build Modal Overlay -->
-  <div id="build-modal" class="modal hidden">
-    <div class="modal-content">
-      <div class="modal-header">Select Factory <span id="close-modal" class="close">✖</span></div>
-      <div class="shop-list" id="shop-list"></div>
-    </div>
-  </div>
-  
-  <!-- Upgrade Modal Overlay -->
-  <div id="upgrade-modal" class="modal hidden">
-    <div class="modal-content">
-      <div class="modal-header">Manage Factory <span id="close-upg-modal" class="close">✖</span></div>
-      <div class="factory-details">
-        <h2 id="fac-name">Processor</h2>
-        <div class="fac-stats">
-          Speed: <span id="fac-speed">2.0s</span>
-        </div>
-        <button id="fac-upg-btn" class="action-btn">Upgrade ($<span id="fac-upg-cost">0</span>)</button>
-        <button id="fac-sell-btn" class="action-btn danger">Sell Factory (50% refund)</button>
-      </div>
-    </div>
-  </div>
-
-  <script src="game.js"></script>
+    <script src="game.js"></script>
 </body>
 </html>
