@@ -121,7 +121,7 @@ function getClickPower() {
 
 function getPrestigeShardsEarned() {
     const shardPrestigeMult = getShardEffect('shardPrestige');
-    return Math.floor(Math.sqrt(game.stats.totalPlasma / 1e6) * shardPrestigeMult);
+    return Math.floor(Math.sqrt(game.totalPlasmaThisRun / 1e6) * shardPrestigeMult);
 }
 
 function getShardUpgradeCost(def) {
